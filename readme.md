@@ -1,530 +1,132 @@
-\# RSDA Pipeline - Restoring Stale Data Affinity
+# RSDA Pipeline - Restoring Stale Data Affinity
 
-
-
-\## Architecture
-
-
+## Architecture
 
 ```
-
 Input Dataset
-
-&nbsp;   ↓
-
-\[Phase 1: Evaluation]
-
-&nbsp;   ├─ Local Entropy Calcul# RSDA Pipeline - Restoring Stale Data Affinity
-
-
-
-\## Architecture
-
-
-
-```
-
-Input Dataset
-
-&nbsp;   ↓
-
-\[Phase 1: Evaluation]
-
-&nbsp;   ├─ Local Entropy Calculation
-
-&nbsp;   ├─ LLM Quality Scoring
-
-&nbsp;   └─ Potential Entropy Computation
-
-&nbsp;   ↓
-
-\[Dual-Threshold Segmentation]
-
-&nbsp;   ├─ High Noise → Discard
-
-&nbsp;   ├─ Renovation Zone → Phase 2
-
-&nbsp;   └─ Low Potential → Selective Reserve
-
-&nbsp;   ↓
-
-\[Phase 2: Renovation]
-
-&nbsp;   ├─ Strategy Selection
-
-&nbsp;   ├─ LLM-based Rewriting
-
-&nbsp;   └─ Quality Enhancement
-
-&nbsp;   ↓
-
+    ↓
+[Phase 1 Evaluation]
+    ├─ Local Entropy Calculation
+    ├─ LLM Quality Scoring
+    └─ Potential Entropy Computation
+    ↓
+[Dual-Threshold Segmentation]
+    ├─ High Noise → Discard
+    ├─ Renovation Zone → Phase 2
+    └─ Low Potential → Selective Reserve
+    ↓
+[Phase 2 Renovation]
+    ├─ Strategy Selection
+    ├─ LLM-based Rewriting
+    └─ Quality Enhancement
+    ↓
 Final Dataset (Renovated + Reserved)
-
 ```
+## Installation
 
-\## Installation
-
-
-
-\### Requirements
-
+### Requirements
 ```bash
-
 pip install torch transformers openai numpy asyncio
-
 ```
 
+## Configuration
 
-
-\## Configuration
-
-
-
-\### File Paths
-
+### File Paths
 ```python
-
-INPUT\_DATA\_FILE = "path/to/input.json"
-
-FINAL\_DATASET\_FILE = "output\_dataset.json"
-
-STATISTICS\_FILE = "pipeline\_stats.json"
-
+INPUT_DATA_FILE = pathtoinput.json
+FINAL_DATASET_FILE = output_dataset.json
+STATISTICS_FILE = pipeline_stats.json
 ```
 
-
-
-\### Strategy Configuration
-
-Edit `strategy\_prompts.json` to customize renovation strategies:
-
+### Strategy Configuration
+Edit `strategy_prompts.json` to customize renovation strategies
 ```json
-
 {
-
-&nbsp; "instruction": {
-
-&nbsp;   "0": "Keep unchanged",
-
-&nbsp;   "1": "Rewrite with positive tone..."
-
-&nbsp; },
-
-&nbsp; "input": {
-
-&nbsp;   "0": "Keep unchanged",
-
-&nbsp;   "1": "Add rich context...",
-
-&nbsp;   "2": "Perform domain migration..."
-
-&nbsp; },
-
-&nbsp; "output": {
-
-&nbsp;   "0": "Add Chain-of-Thought...",
-
-&nbsp;   "1": "Provide diverse solutions...",
-
-&nbsp;   "2": "Make more concise...",
-
-&nbsp;   "3": "Enrich background..."
-
-&nbsp; }
-
+  instruction {
+    0 Keep unchanged,
+    1 Rewrite with positive tone...
+  },
+  input {
+    0 Keep unchanged,
+    1 Add rich context...,
+    2 Perform domain migration...
+  },
+  output {
+    0 Add Chain-of-Thought...,
+    1 Provide diverse solutions...,
+    2 Make more concise...,
+    3 Enrich background...
+  }
 }
-
 ```
-
-\## Input Data Format
-
-
+## Input Data Format
 
 ```json
-
-\[
-
-&nbsp; {
-
-&nbsp;   "instruction": "Explain the concept...",
-
-&nbsp;   "input": "Given context...",
-
-&nbsp;   "output": "The explanation is..."
-
-&nbsp; }
-
+[
+  {
+    instruction Explain the concept...,
+    input Given context...,
+    output The explanation is...
+  }
 ]
-
 ```
 
+## Output Files
 
-
-\## Output Files
-
-
-
-\### 1. \*\*Final Dataset\*\* (`dolly\_u.json`)
-
-Combined renovated and reserved high-quality samples with metadata:
-
+### 1. Final Dataset (`dolly_u.json`)
+Combined renovated and reserved high-quality samples with metadata
 ```json
-
 {
-
-&nbsp; "instruction": "...",
-
-&nbsp; "input": "...",
-
-&nbsp; "output": "...",
-
-&nbsp; "meta": {
-
-&nbsp;   "original\_id": 0,
-
-&nbsp;   "potential\_entropy": 0.456,
-
-&nbsp;   "strategy\_mark": \[1, 2, 0],
-
-&nbsp;   "zone": "renovation"
-
-&nbsp; }
-
+  instruction ...,
+  input ...,
+  output ...,
+  meta {
+    original_id 0,
+    potential_entropy 0.456,
+    strategy_mark [1, 2, 0],
+    zone renovation
+  }
 }
-
 ```
 
-
-
-\### 2. \*\*Evaluation Report\*\* (`dolly\_evaluation.json`)
-
+### 2. Evaluation Report (`dolly_evaluation.json`)
 Detailed analysis for each sample including scores, gaps, and entropy metrics.
 
-
-
-\### 3. \*\*Statistics\*\* (`dolly\_pipeline.json`)
-
-Pipeline performance metrics:
-
+### 3. Statistics (`dolly_pipeline.json`)
+Pipeline performance metrics
 ```json
-
 {
-
-&nbsp; "total\_samples": 1000,
-
-&nbsp; "segmentation": {
-
-&nbsp;   "high\_noise\_zone": {"count": 100, "percentage": 10.0},
-
-&nbsp;   "renovation\_zone": {"count": 700, "renovated": 680},
-
-&nbsp;   "low\_potential\_zone": {"reserved\_high\_quality": 100}
-
-&nbsp; },
-
-&nbsp; "final\_dataset\_composition": {
-
-&nbsp;   "total\_final\_samples": 780,
-
-&nbsp;   "retention\_rate": 78.0
-
-&nbsp; }
-
+  total_samples 1000,
+  segmentation {
+    high_noise_zone {count 100, percentage 10.0},
+    renovation_zone {count 700, renovated 680},
+    low_potential_zone {reserved_high_quality 100}
+  },
+  final_dataset_composition {
+    total_final_samples 780,
+    retention_rate 78.0
+  }
 }
-
 ```
 
+## Usage
 
-
-\## Usage
-
-
-
-\### Basic Execution
-
+### Basic Execution
 ```bash
-
-python uldp\_pipeline.py
-
+python uldp_pipeline.py
 ```
 
-
-
-\### Environment Variables
-
+### Environment Variables
 ```bash
-
-export OPENAI\_API\_KEY="your-api-key"
-
-python uldp\_pipeline.py
-
+export OPENAI_API_KEY=your-api-key
+python uldp_pipeline.py
 ```
 
-
-
-\### Custom Configuration
-
-Modify the configuration section in the script:
-
+### Custom Configuration
+Modify the configuration section in the script
 ```python
-
-API\_KEY = "your-api-key"
-
-BASE\_URL = "https://api.openai.com/v1"
-
-MODEL\_NAME = "gpt-4o"
-
-LOCAL\_MODEL\_ID = "path/to/local/model"
-
+API_KEY = your-api-key
+BASE_URL = httpsapi.openai.comv1
+MODEL_NAME = gpt-4o
+LOCAL_MODEL_ID = pathtolocalmodel
 ```
-
-ation
-
-&nbsp;   ├─ LLM Quality Scoring
-
-&nbsp;   └─ Potential Entropy Computation
-
-&nbsp;   ↓
-
-\[Dual-Threshold Segmentation]
-
-&nbsp;   ├─ High Noise → Discard
-
-&nbsp;   ├─ Renovation Zone → Phase 2
-
-&nbsp;   └─ Low Potential → Selective Reserve
-
-&nbsp;   ↓
-
-\[Phase 2: Renovation]
-
-&nbsp;   ├─ Strategy Selection
-
-&nbsp;   ├─ LLM-based Rewriting
-
-&nbsp;   └─ Quality Enhancement
-
-&nbsp;   ↓
-
-Final Dataset (Renovated + Reserved)
-
-```
-
-\## Installation
-
-
-
-\### Requirements
-
-```bash
-
-pip install torch transformers openai numpy asyncio
-
-```
-
-
-
-\## Configuration
-
-
-
-\### File Paths
-
-```python
-
-INPUT\_DATA\_FILE = "path/to/input.json"
-
-FINAL\_DATASET\_FILE = "output\_dataset.json"
-
-STATISTICS\_FILE = "pipeline\_stats.json"
-
-```
-
-
-
-\### Strategy Configuration
-
-Edit `strategy\_prompts.json` to customize renovation strategies:
-
-```json
-
-{
-
-&nbsp; "instruction": {
-
-&nbsp;   "0": "Keep unchanged",
-
-&nbsp;   "1": "Rewrite with positive tone..."
-
-&nbsp; },
-
-&nbsp; "input": {
-
-&nbsp;   "0": "Keep unchanged",
-
-&nbsp;   "1": "Add rich context...",
-
-&nbsp;   "2": "Perform domain migration..."
-
-&nbsp; },
-
-&nbsp; "output": {
-
-&nbsp;   "0": "Add Chain-of-Thought...",
-
-&nbsp;   "1": "Provide diverse solutions...",
-
-&nbsp;   "2": "Make more concise...",
-
-&nbsp;   "3": "Enrich background..."
-
-&nbsp; }
-
-}
-
-```
-
-\## Input Data Format
-
-
-
-```json
-
-\[
-
-&nbsp; {
-
-&nbsp;   "instruction": "Explain the concept...",
-
-&nbsp;   "input": "Given context...",
-
-&nbsp;   "output": "The explanation is..."
-
-&nbsp; }
-
-]
-
-```
-
-
-
-\## Output Files
-
-
-
-\### 1. \*\*Final Dataset\*\* (`dolly\_u.json`)
-
-Combined renovated and reserved high-quality samples with metadata:
-
-```json
-
-{
-
-&nbsp; "instruction": "...",
-
-&nbsp; "input": "...",
-
-&nbsp; "output": "...",
-
-&nbsp; "meta": {
-
-&nbsp;   "original\_id": 0,
-
-&nbsp;   "potential\_entropy": 0.456,
-
-&nbsp;   "strategy\_mark": \[1, 2, 0],
-
-&nbsp;   "zone": "renovation"
-
-&nbsp; }
-
-}
-
-```
-
-
-
-\### 2. \*\*Evaluation Report\*\* (`dolly\_evaluation.json`)
-
-Detailed analysis for each sample including scores, gaps, and entropy metrics.
-
-
-
-\### 3. \*\*Statistics\*\* (`dolly\_pipeline.json`)
-
-Pipeline performance metrics:
-
-```json
-
-{
-
-&nbsp; "total\_samples": 1000,
-
-&nbsp; "segmentation": {
-
-&nbsp;   "high\_noise\_zone": {"count": 100, "percentage": 10.0},
-
-&nbsp;   "renovation\_zone": {"count": 700, "renovated": 680},
-
-&nbsp;   "low\_potential\_zone": {"reserved\_high\_quality": 100}
-
-&nbsp; },
-
-&nbsp; "final\_dataset\_composition": {
-
-&nbsp;   "total\_final\_samples": 780,
-
-&nbsp;   "retention\_rate": 78.0
-
-&nbsp; }
-
-}
-
-```
-
-
-
-\## Usage
-
-
-
-\### Basic Execution
-
-```bash
-
-python uldp\_pipeline.py
-
-```
-
-
-
-\### Environment Variables
-
-```bash
-
-export OPENAI\_API\_KEY="your-api-key"
-
-python uldp\_pipeline.py
-
-```
-
-
-
-\### Custom Configuration
-
-Modify the configuration section in the script:
-
-```python
-
-API\_KEY = "your-api-key"
-
-BASE\_URL = "https://api.openai.com/v1"
-
-MODEL\_NAME = "gpt-4o"
-
-LOCAL\_MODEL\_ID = "path/to/local/model"
-
-```
-
-
-
